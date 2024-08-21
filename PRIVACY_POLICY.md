@@ -44,3 +44,7 @@ We may update our Privacy Policy from time to time. Changes will be reflected on
 If you have any questions or concerns about this Privacy Policy or the use of your data, please contact us at:
 - **Pranay Suyash**
 - **pranay.suyash@gmail.com**
+
+### 8. Affiliation Disclaimer
+
+Claude Chat Exporter is an unofficial tool created for personal use and convenience. We are not affiliated with, endorsed by, or associated with Anthropic, the creators of Claude.ai. This extension operates independently and solely within the user's browser environment.
