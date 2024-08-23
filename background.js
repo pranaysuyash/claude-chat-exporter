@@ -29,44 +29,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return null;
     }
   }
-  
-//   async function downloadChat(chatUrl) {
-//     const url = new URL(chatUrl);
-//     const chatId = url.pathname.split('/').pop();
-//     console.log('Extracted Chat ID:', chatId);
-  
-//     const organizationId = await getOrganizationId();
-//     if (!organizationId) {
-//       // Handle the error (e.g., show an error message in the popup)
-//       console.error('Failed to retrieve organization ID.');
-//       return;
-//     }
-  
-//     const apiUrl = `https://api.claude.ai/api/organizations/${organizationId}/chat_conversations/${chatId}?tree=True&rendering_mode=raw`;
-  
-//     try {
-//       const response = await fetch(apiUrl, {
-//         method: 'GET',
-//         credentials: 'include',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       });
-  
-//       if (!response.ok) {
-//         throw new Error(`Failed to fetch chat data. Status: ${response.status}`);
-//       }
-  
-//       const data = await response.json();
-//       console.log('Chat Data:', data);
-  
-//       const htmlContent = generateHtmlContent(data);
-//       initiateDownload(htmlContent, `claude_chat_${chatId}.html`);
-//     } catch (error) {
-//       console.error('Error:', error);
-//     }
-//   }
-  
 // Function to download the chat data and initiate the download
 async function downloadChat(chatUrl) {
     const url = new URL(chatUrl);
@@ -160,7 +122,8 @@ async function downloadChat(chatUrl) {
   
   function formatMessageText(text) {
     // Escape HTML characters (corrected)
-    const escapedText = text.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+    // const escapedText = text.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+    const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   
     // Convert markdown code blocks to <pre> tags
     const formattedText = escapedText.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
