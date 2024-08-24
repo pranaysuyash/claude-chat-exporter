@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Claude Chat Exporter</title>
     <style>
         body {
@@ -60,14 +59,15 @@
 </head>
 <body>
     <h2>Claude Chat Exporter</h2>
-    <div class="input-group">
-        <label for="chatUrl">Enter Claude Chat URL (optional):</label>
-        <input type="text" id="chatUrl" placeholder="https://claude.ai/chat/your-chat-id">
-    </div>
-    <div id="linkOptions"></div>
-    <button id="downloadCurrentTab">Download Chat from Current Tab</button>
+    <button id="downloadCurrentTab">Download Current Chat</button>
+    <input type="text" id="chatUrl" placeholder="Enter Claude chat URL">
     <button id="downloadFromUrl">Download Chat from URL</button>
-    <p id="status"></p>
+    <button id="massDownload">Mass Download</button>
+    <div id="chatListContainer" style="display: none;">
+        <div id="chatList"></div>
+        <button id="downloadSelectedChats">Download Selected Chats</button>
+    </div>
+    <div id="status"></div>
     <script src="popup.js"></script>
 </body>
 </html>
