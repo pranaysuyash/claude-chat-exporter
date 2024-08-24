@@ -161,7 +161,6 @@ async function downloadSelectedChats(chats) {
   }
 }
 
-
 async function generateHtmlContentWithImages(data, chatId, organizationId) {
   let html = `
       <!DOCTYPE html>
@@ -180,9 +179,9 @@ async function generateHtmlContentWithImages(data, chatId, organizationId) {
               pre { white-space: pre-wrap; word-wrap: break-word; background-color: #f0f0f0; padding: 10px; border-radius: 4px; overflow: auto; }
               img { max-width: 100%; height: auto; display: block; margin: 10px 0; }
               a.file-link { display: block; margin: 10px 0; color: #007BFF; text-decoration: none; }
-              .group.relative.inline-block { /* Add any necessary styling */ }
-              .fade-out-bottom { /* Add any necessary styling */ }
-              .text-center { /* Add any necessary styling */ }
+              .attachment { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; }
+              .attachment-header { font-weight: bold; margin-bottom: 5px; }
+              .html-content { border: 1px solid #ddd; padding: 10px; margin-top: 5px; }
           </style>
       </head>
       <body>
@@ -194,42 +193,46 @@ async function generateHtmlContentWithImages(data, chatId, organizationId) {
       const messageTime = new Date(msg.created_at).toLocaleString();
       let messageContent = formatMessageText(msg.text);
 
-      // Handling text and image attachments
+      // Handling attachments
       if (msg.attachments && msg.attachments.length > 0) {
           for (const attachment of msg.attachments) {
-              if (attachment.file_type === 'txt' && attachment.extracted_content) {
-                  // Render the text content directly
-                  messageContent += `
-                      <div data-testid="${attachment.file_name}" class="group relative inline-block p-0.5 -mb-1 cursor-pointer">
-                          <div class="relative grid grid-rows-[1fr_auto] items-center mt-4 drop-shadow-lg">
-                              <div class="fade-out-bottom text-accent-secondary-100 pointer-events-none visible relative z-[1] h-full overflow-hidden break-words text-left leading-tight tracking-tight">
-                                  <pre>${attachment.extracted_content}</pre>
-                              </div>
-                          </div>
-                      </div>
-                  `;
+              messageContent += `<div class="attachment">`;
+              messageContent += `<div class="attachment-header">${attachment.file_name}</div>`;
+              
+              if (['txt', 'html', 'htm', 'email'].includes(attachment.file_type) && attachment.extracted_content) {
+                  if (attachment.file_type === 'txt') {
+                      messageContent += `<pre>${escapeHtml(attachment.extracted_content)}</pre>`;
+                  } else {
+                      messageContent += `<div class="html-content">${attachment.extracted_content}</div>`;
+                  }
+              } else if (attachment.file_type === 'js') {
+                  messageContent += `<a href="#" class="file-link" onclick="alert('JavaScript file download not implemented in this view.')">Download ${attachment.file_name}</a>`;
+              } else {
+                  messageContent += `<pre>${escapeHtml(attachment.extracted_content || 'Content not available')}</pre>`;
               }
+              
+              messageContent += `</div>`;
           }
       }
 
-      // Handling image files
+      // Handling files (mainly images)
       if (msg.files && msg.files.length > 0) {
           for (const file of msg.files) {
               const thumbnailUrl = `https://claude.ai${file.thumbnail_url}`;
               const previewUrl = `https://claude.ai${file.preview_url}`;
 
-              // Display thumbnail with a link to download the full image
               messageContent += `
-                  <div data-test-render-count="2" class="relative grid grid-rows-[1fr_auto] items-center mt-4 h-36 w-32 drop-shadow-lg">
-                      <img src="${thumbnailUrl}" alt="${file.file_name}" class="fade-out-bottom text-accent-secondary-100 pointer-events-none visible relative z-[1] h-full overflow-hidden break-words text-left leading-tight tracking-tight">
-                      <a href="${previewUrl}" download="${file.file_name}" class="text-center file-link">Download ${file.file_name}</a>
+                  <div class="attachment">
+                      <div class="attachment-header">${file.file_name}</div>
+                      <img src="${thumbnailUrl}" alt="${file.file_name}">
+                      <a href="${previewUrl}" download="${file.file_name}" class="file-link">Download ${file.file_name}</a>
                   </div>
               `;
           }
       }
 
       html += `
-          <div class="message ${className}" data-test-render-count="2">
+          <div class="message ${className}">
               <div class="message-header">${msg.sender === 'human' ? 'You' : 'Claude'} <span class="message-time">${messageTime}</span></div>
               <div class="message-content">${messageContent}</div>
           </div>
@@ -244,8 +247,20 @@ async function generateHtmlContentWithImages(data, chatId, organizationId) {
   return html;
 }
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
 
-
+function formatMessageText(text) {
+  const escapedText = escapeHtml(text);
+  const formattedText = escapedText.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+  return formattedText.replace(/\n/g, '<br>');
+}
 async function fetchImageWithReferer(fileId, chatId, organizationId) {
   try {
       const imageUrl = `https://claude.ai/api/organizations/${organizationId}/files/${fileId}/download`;
