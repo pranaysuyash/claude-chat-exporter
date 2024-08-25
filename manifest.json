@@ -5,7 +5,6 @@
   "description": "Download and export chats from Claude.ai easily.",
   "permissions": [
     "activeTab",
-    "scripting",
     "tabs",
     "downloads"
   ],
